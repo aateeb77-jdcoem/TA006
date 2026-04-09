@@ -1,4 +1,4 @@
-const API_BASE = "http://localhost:5000/api";
+const API_BASE = "/api";
 
 // ─── DOM Elements ─────────────────────────────────────────
 const productGrid = document.getElementById('productGrid');
@@ -57,8 +57,16 @@ async function fetchProducts() {
         allProducts = products;
         renderProducts(products);
     } catch (error) {
-        console.error('Error fetching products:', error);
-        productGrid.innerHTML = `<p style="color:var(--error-color)">Failed to load products. Ensure backend is running.</p>`;
+        console.warn('Backend API failed, falling back to static dataset for Hackathon demo...', error);
+        try {
+            // HACKATHON QUICK FIX: Load dummy dataset if backend is down!
+            const fallbackResponse = await fetch('../dataset.json'); 
+            const fallbackProducts = await fallbackResponse.json();
+            allProducts = fallbackProducts;
+            renderProducts(fallbackProducts);
+        } catch (fallbackError) {
+            productGrid.innerHTML = `<p style="color:var(--error-color)">Failed to load products. Ensure backend is running.</p>`;
+        }
     } finally {
         loading.classList.add('hidden');
     }
